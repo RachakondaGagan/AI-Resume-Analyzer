@@ -1,0 +1,279 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: #ffffff;
+    font-family: 'Mona Sans', ui-sans-serif, system-ui, sans-serif;
+  }
+
+  main {
+    min-height: 100vh;
+    padding-top: 2.5rem;
+  }
+
+  /* Gradient text — used on h1 */
+  h1 {
+    font-size: 3.75rem;
+    line-height: 1.1;
+    font-weight: 600;
+    letter-spacing: -0.05em;
+    background: linear-gradient(90deg, #AB8C95 0%, #000000 50%, #8E97C5 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0;
+  }
+
+  h2 {
+    font-size: 1.875rem;
+    color: #475467;
+    margin: 0;
+  }
+
+  label {
+    color: #475467;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  input, textarea {
+    width: 100%;
+    padding: 1rem;
+    border-radius: 1rem;
+    border: none;
+    outline: none;
+    background: #ffffff;
+    font-family: inherit;
+    font-size: 1rem;
+    box-shadow: inset 0 0 12px 0 rgba(36, 99, 235, 0.2);
+  }
+
+  input:focus, textarea:focus {
+    box-shadow: inset 0 0 16px 0 rgba(36, 99, 235, 0.35);
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+    width: 100%;
+  }
+}
+
+@layer components {
+  /* Gradient text utility */
+  .text-gradient {
+    background: linear-gradient(90deg, #AB8C95 0%, #000000 50%, #8E97C5 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Soft blue gradient card border */
+  .gradient-border {
+    background: linear-gradient(
+      to bottom,
+      rgba(193, 211, 248, 0.15),
+      rgba(167, 191, 241, 0.35)
+    );
+    padding: 1rem;
+    border-radius: 1rem;
+  }
+
+  /* Primary CTA button */
+  .primary-button {
+    display: inline-block;
+    color: #ffffff;
+    border-radius: 9999px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    text-align: center;
+    border: none;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 500;
+    background: linear-gradient(to bottom, #8e98ff, #606beb);
+    transition: background 0.2s ease;
+  }
+  .primary-button:hover:not(:disabled) {
+    background: linear-gradient(to bottom, #717dff, #4957eb);
+  }
+
+  /* Auth page sign-in button */
+  .auth-button {
+    border-radius: 9999px;
+    padding: 1rem 2rem;
+    cursor: pointer;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #ffffff;
+    border: none;
+    font-family: inherit;
+    min-width: 260px;
+    background: linear-gradient(to bottom, #8e98ff, #606beb);
+    transition: background 0.2s ease;
+  }
+  .auth-button:hover {
+    background: linear-gradient(to bottom, #717dff, #4957eb);
+  }
+
+  /* Navbar */
+  .navbar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    background: #ffffff;
+    border-radius: 9999px;
+    padding: 1rem 2.5rem;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* Page wrapper */
+  .main-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    padding: 3rem 1.5rem 2rem;
+  }
+  @media (min-width: 1024px) {
+    .main-section { padding: 3rem 4rem 2rem; }
+  }
+
+  /* Centered hero heading block */
+  .page-heading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    max-width: 56rem;
+    text-align: center;
+  }
+
+  /* Resume grid */
+  .resumes-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    align-items: flex-start;
+    width: 100%;
+    max-width: 1850px;
+    justify-content: center;
+  }
+
+  /* Resume card */
+  .resume-card {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    height: 560px;
+    width: 100%;
+    background: #ffffff;
+    border-radius: 1rem;
+    padding: 1rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  @media (min-width: 1024px) {
+    .resume-card { width: 450px; }
+  }
+  @media (min-width: 1280px) {
+    .resume-card { width: 490px; }
+  }
+
+  .resume-card-header {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    justify-content: space-between;
+    min-height: 110px;
+  }
+
+  /* Resume detail split-panel feedback column */
+  .feedback-section {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    width: 50%;
+    padding: 1.5rem 2rem;
+  }
+  @media (max-width: 1023px) {
+    .feedback-section { width: 100%; }
+  }
+
+  /* Resume detail top nav */
+  .resume-nav {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+    background: #ffffff;
+  }
+
+  /* Back button in resume detail */
+  .back-button {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    cursor: pointer;
+    background: #ffffff;
+    font-family: inherit;
+  }
+  .back-button:hover { background: #f9fafb; }
+
+  /* Form field wrapper */
+  .form-div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+    align-items: flex-start;
+  }
+
+  /* Uploaded file row inside FileUploader */
+  .uploader-selected-file {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem;
+    background: #f9fafb;
+    border-radius: 1rem;
+  }
+
+  /* Summary score row */
+  .resume-summary {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    gap: 1rem;
+  }
+  .resume-summary .category {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    align-items: center;
+    background: #f9fafb;
+    border-radius: 1rem;
+    padding: 1rem;
+    width: 100%;
+    justify-content: space-between;
+  }
+}
