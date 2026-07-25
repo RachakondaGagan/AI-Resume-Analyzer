@@ -40,12 +40,6 @@ export default function Home() {
       <Navbar />
       <section className="main-section max-w-7xl mx-auto px-4 pt-10">
         <div className="page-heading w-full flex flex-col items-center text-center gap-4">
-          <div className="inline-flex items-center gap-2 bg-indigo-50 border border-indigo-200/80 rounded-full px-4 py-1 shadow-xs">
-            <span className="text-xs font-bold uppercase tracking-wider text-indigo-900">
-              📊 Candidate Dashboard
-            </span>
-          </div>
-
           <h1 className="text-4xl sm:text-5xl font-black tracking-tight max-w-3xl">
             Track Applications & AI Ratings
           </h1>
@@ -104,6 +98,55 @@ export default function Home() {
             </button>
           </div>
         )}
+
+        {/* Feature Cards Grid — Displayed on Home Page */}
+        <div className="w-full max-w-5xl mt-12 pt-8 border-t border-slate-200/60">
+          <div className="text-center mb-8">
+            <h3 className="text-2xl font-black text-slate-900">How Resumind Supercharges Your Job Search</h3>
+            <p className="text-slate-500 text-sm mt-1">AI-powered resume optimization designed to bypass ATS filters</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+            <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm flex flex-col gap-3">
+              <span className="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-black">
+                01
+              </span>
+              <h4 className="font-bold text-slate-900 text-base">Comprehensive ATS Scoring</h4>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Evaluates formatting, section hierarchy, ATS keyword density, and bullet point structure against industry standards.
+              </p>
+            </div>
+
+            <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm flex flex-col gap-3">
+              <span className="w-8 h-8 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center text-xs font-black">
+                02
+              </span>
+              <h4 className="font-bold text-slate-900 text-base">Tone & Impact Analytics</h4>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Highlights strong action verbs, quantifiable achievements, and active voice to maximize recruiter interest.
+              </p>
+            </div>
+
+            <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm flex flex-col gap-3">
+              <span className="w-8 h-8 rounded-xl bg-pink-100 text-pink-700 flex items-center justify-center text-xs font-black">
+                03
+              </span>
+              <h4 className="font-bold text-slate-900 text-base">Targeted Suggestions</h4>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Receive actionable bullet-by-bullet improvement tips tailored directly to your target role and industry.
+              </p>
+            </div>
+          </div>
+
+          {/* Privacy Banner */}
+          <div className="mt-8 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl p-6 shadow-lg flex items-center justify-center gap-4 text-center">
+            <div className="text-3xl">🔒</div>
+            <div className="text-left">
+              <p className="text-xs font-extrabold text-indigo-300 uppercase tracking-wider">Privacy Guaranteed</p>
+              <p className="text-xs text-slate-300 mt-0.5">Your files are stored securely in browser storage and Puter Cloud.</p>
+            </div>
+          </div>
+        </div>
       </section>
     </main>
   );

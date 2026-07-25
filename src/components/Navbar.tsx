@@ -38,23 +38,13 @@ export default function Navbar() {
   return (
     <header className="sticky top-4 z-40 w-full max-w-7xl mx-auto px-4">
       <nav className="flex items-center justify-between bg-white/90 backdrop-blur-md border border-slate-200/80 shadow-sm rounded-full px-6 py-3 transition-all duration-300">
-        {/* Brand Logo & Tag */}
+        {/* Brand Logo */}
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/')}
-            className="flex items-center gap-2.5 bg-transparent border-none p-0 cursor-pointer text-left group"
+            className="flex items-center bg-transparent border-none p-0 cursor-pointer text-left group"
           >
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center text-white shadow-md shadow-indigo-200 group-hover:scale-105 transition-transform">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-            </div>
-            <div>
-              <span className="text-xl font-black tracking-tight text-gradient">RESUMIND</span>
-              <span className="ml-2 text-[10px] font-extrabold uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-full px-2 py-0.5">
-                AI SaaS
-              </span>
-            </div>
+            <span className="text-2xl font-black tracking-tight text-gradient">RESUMIND</span>
           </button>
 
           {/* Navigation Links */}

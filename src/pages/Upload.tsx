@@ -127,14 +127,6 @@ export default function Upload() {
 
       <section className="main-section max-w-5xl mx-auto px-4 pt-10">
         <div className="page-heading w-full flex flex-col items-center text-center gap-4">
-          {/* SaaS Pill Tag */}
-          <div className="inline-flex items-center gap-2 bg-indigo-50 border border-indigo-200/80 rounded-full px-4 py-1.5 shadow-xs">
-            <span className="w-2 h-2 rounded-full bg-indigo-600 animate-pulse" />
-            <span className="text-xs font-bold uppercase tracking-wider text-indigo-900">
-              ✨ Next-Gen AI ATS Analyzer
-            </span>
-          </div>
-
           <h1 className="text-4xl sm:text-5xl font-black tracking-tight max-w-3xl leading-tight">
             Smart Feedback for Your Dream Job
           </h1>
@@ -230,9 +222,9 @@ export default function Upload() {
               </div>
             </div>
           ) : (
-            <div className="w-full max-w-4xl mt-6 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-              {/* Left Column — Form Container */}
-              <div className="lg:col-span-7 bg-white rounded-3xl p-8 border border-slate-200/80 shadow-xl text-left flex flex-col gap-6">
+            <div className="w-full max-w-xl mt-6">
+              {/* Centered Large Form Container */}
+              <div className="bg-white rounded-3xl p-8 sm:p-10 border border-slate-200/80 shadow-xl text-left flex flex-col gap-6">
                 <div className="flex items-center justify-between border-b pb-4">
                   <div>
                     <h3 className="text-xl font-bold text-slate-900">Application Details</h3>
@@ -319,54 +311,6 @@ export default function Upload() {
                     🚀 Analyze Resume with AI
                   </button>
                 </form>
-              </div>
-
-              {/* Right Column — Feature Cards & SaaS Benefits */}
-              <div className="lg:col-span-5 flex flex-col gap-5 text-left">
-                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-md">
-                  <h4 className="font-bold text-slate-900 text-base mb-4 flex items-center gap-2">
-                    <span className="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold">
-                      01
-                    </span>
-                    Comprehensive ATS Scoring
-                  </h4>
-                  <p className="text-xs text-slate-600 leading-relaxed">
-                    Evaluates formatting, section hierarchy, ATS keyword density, and bullet point structure against industry standards.
-                  </p>
-                </div>
-
-                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-md">
-                  <h4 className="font-bold text-slate-900 text-base mb-4 flex items-center gap-2">
-                    <span className="w-7 h-7 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center text-xs font-bold">
-                      02
-                    </span>
-                    Tone & Impact Analytics
-                  </h4>
-                  <p className="text-xs text-slate-600 leading-relaxed">
-                    Highlights strong action verbs, quantifiable achievements, and active voice to maximize recruiter interest.
-                  </p>
-                </div>
-
-                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-md">
-                  <h4 className="font-bold text-slate-900 text-base mb-4 flex items-center gap-2">
-                    <span className="w-7 h-7 rounded-lg bg-pink-100 text-pink-700 flex items-center justify-center text-xs font-bold">
-                      03
-                    </span>
-                    Targeted Suggestions
-                  </h4>
-                  <p className="text-xs text-slate-600 leading-relaxed">
-                    Receive actionable bullet-by-bullet improvement tips tailored directly to your target role and industry.
-                  </p>
-                </div>
-
-                {/* Trust Footer Pill */}
-                <div className="bg-gradient-to-r from-slate-900 to-indigo-950 text-white rounded-2xl p-5 shadow-lg flex items-center gap-3">
-                  <div className="text-2xl">🔒</div>
-                  <div>
-                    <p className="text-xs font-bold text-indigo-200 uppercase tracking-wider">Privacy Guaranteed</p>
-                    <p className="text-[11px] text-slate-300 mt-0.5">Your files are stored securely in browser storage and Puter Cloud.</p>
-                  </div>
-                </div>
               </div>
             </div>
           )}
