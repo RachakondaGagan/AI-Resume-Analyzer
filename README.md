@@ -14,7 +14,6 @@ Resumind is an intelligent, privacy-first web application designed to evaluate r
 [![Puter.js](https://img.shields.io/badge/Puter.js_Cloud-0052CC?style=for-the-badge&logo=cloud&logoColor=white)](https://puter.com/)
 [![Zustand](https://img.shields.io/badge/Zustand-443E38?style=for-the-badge&logo=redux&logoColor=white)](https://github.com/pmndrs/zustand)
 [![PDF.js](https://img.shields.io/badge/PDF.js-FF0000?style=for-the-badge&logo=adobeacrobatreader&logoColor=white)](https://mozilla.github.io/pdf.js/)
-[![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 
 ---
 
