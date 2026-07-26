@@ -13,7 +13,7 @@ async function loadPdfJs(): Promise<any> {
   if (pdfjsLib) return pdfjsLib;
   if (loadPromise) return loadPromise;
   loadPromise = import('pdfjs-dist').then((lib) => {
-    lib.GlobalWorkerOptions.workerSrc = pdfWorker || `https://cdn.jsdelivr.net/npm/pdfjs-dist@${lib.version}/build/pdf.worker.min.mjs`;
+    lib.GlobalWorkerOptions.workerSrc = pdfWorker;
     pdfjsLib = lib;
     return lib;
   });

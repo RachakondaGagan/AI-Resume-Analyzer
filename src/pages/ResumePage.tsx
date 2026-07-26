@@ -6,66 +6,68 @@ import ATS from '../components/ATS';
 import Details from '../components/Details';
 
 export default function ResumePage() {
-  const { auth, puterReady, isLoading, fs, kv } = usePuterStore();
-  const params = useParams();
+  const { auth, puterReady, fs, kv } = usePuterStore();
+  const { id } = useParams();
   const { navigate } = useNavigate();
-
   const [imageUrl, setImageUrl] = useState('');
   const [resumeUrl, setResumeUrl] = useState('');
   const [resume, setResume] = useState<Resume | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
-  // Redirect to auth if not signed in
+  // Redirect to auth if not signed in once puter is ready
   useEffect(() => {
-    if (puterReady && !isLoading && !auth.isAuthenticated) {
-      navigate(`/auth?next=/resume/${params.id}`);
+    if (puterReady && !auth.isAuthenticated) {
+      navigate(`/auth?next=/resume/${id}`);
     }
-  }, [puterReady, isLoading, auth.isAuthenticated]);
+  }, [puterReady, auth.isAuthenticated, id, navigate]);
 
-  // Load resume data — depends on puterReady + auth + id all being available
+  // Load resume data once puter is ready + user is authed + we have an id
   useEffect(() => {
-    const id = params.id;
     if (!puterReady || !auth.isAuthenticated || !id) return;
 
     let cancelled = false;
-
     const load = async () => {
       setLoading(true);
       setNotFound(false);
-      setResume(null);
-      setImageUrl('');
-      setResumeUrl('');
 
       try {
-        const raw = await kv.get(`resume:${id}`);
-        if (cancelled) return;
-        if (!raw) { setNotFound(true); setLoading(false); return; }
+        // 1. Check local session storage first (instant load after upload)
+        let raw = sessionStorage.getItem(`resume:${id}`);
+        if (!raw) {
+          // 2. Poll Puter KV up to 3 attempts (handles network sync lag)
+          for (let attempt = 0; attempt < 3; attempt++) {
+            raw = (await kv.get(`resume:${id}`)) ?? null;
+            if (raw) break;
+            await new Promise((r) => setTimeout(r, 400));
+          }
+        }
+
+        if (!raw || cancelled) {
+          setNotFound(true);
+          setLoading(false);
+          return;
+        }
 
         const data: Resume = JSON.parse(raw);
         if (!cancelled) setResume(data);
 
-        // Load PDF blob
-        if (data.resumePath) {
-          try {
-            const pdfBlob = await fs.read(data.resumePath);
-            if (pdfBlob && !cancelled) {
-              setResumeUrl(URL.createObjectURL(new Blob([pdfBlob], { type: 'application/pdf' })));
-            }
-          } catch (e) {
-            console.warn('Could not read resume PDF blob:', e);
+        // Check instant local thumbnail cache
+        const localImg = sessionStorage.getItem(`resume_img:${id}`);
+        if (localImg && !cancelled) {
+          setImageUrl(localImg);
+        } else if (data.imagePath) {
+          const imgBlob = await fs.read(data.imagePath);
+          if (imgBlob && !cancelled) {
+            setImageUrl(URL.createObjectURL(imgBlob));
           }
         }
 
-        // Load image blob
-        if (data.imagePath) {
-          try {
-            const imgBlob = await fs.read(data.imagePath);
-            if (imgBlob && !cancelled) {
-              setImageUrl(URL.createObjectURL(imgBlob));
-            }
-          } catch (e) {
-            console.warn('Could not read image blob:', e);
+        // Load PDF blob for the "open PDF" link
+        if (data.resumePath) {
+          const pdfBlob = await fs.read(data.resumePath);
+          if (pdfBlob && !cancelled) {
+            setResumeUrl(URL.createObjectURL(new Blob([pdfBlob], { type: 'application/pdf' })));
           }
         }
       } catch (err) {
@@ -78,7 +80,7 @@ export default function ResumePage() {
 
     load();
     return () => { cancelled = true; };
-  }, [puterReady, auth.isAuthenticated, params.id]);
+  }, [puterReady, auth.isAuthenticated, id, fs, kv]);
 
   return (
     <main className="!pt-0 min-h-screen">
@@ -90,14 +92,18 @@ export default function ResumePage() {
         </button>
         {resume && (
           <div className="flex flex-col items-end">
-            {resume.companyName && <p className="font-bold text-gray-800">{resume.companyName}</p>}
-            {resume.jobTitle && <p className="text-sm text-gray-500">{resume.jobTitle}</p>}
+            {resume.companyName && (
+              <p className="font-bold text-gray-800">{resume.companyName}</p>
+            )}
+            {resume.jobTitle && (
+              <p className="text-sm text-gray-500">{resume.jobTitle}</p>
+            )}
           </div>
         )}
       </nav>
 
       <div className="flex flex-row w-full max-lg:flex-col-reverse">
-        {/* LEFT — sticky resume image */}
+        {/* LEFT — sticky resume preview */}
         <section
           className="feedback-section h-[100vh] sticky top-0 items-center justify-center"
           style={{ backgroundImage: "url('/images/bg-small.svg')", backgroundSize: 'cover' }}
@@ -105,7 +111,11 @@ export default function ResumePage() {
           {imageUrl ? (
             <div className="gradient-border h-[90%] w-fit" style={{ animation: 'fadeIn 0.8s ease-in' }}>
               <a href={resumeUrl || '#'} target="_blank" rel="noopener noreferrer" title="Click to open PDF">
-                <img src={imageUrl} className="w-full h-full object-contain rounded-2xl" alt="Resume preview" />
+                <img
+                  src={imageUrl}
+                  className="w-full h-full object-contain rounded-2xl"
+                  alt="Resume preview"
+                />
               </a>
             </div>
           ) : (
@@ -115,10 +125,11 @@ export default function ResumePage() {
           )}
         </section>
 
-        {/* RIGHT — feedback */}
+        {/* RIGHT — feedback panel */}
         <section className="feedback-section">
           <p className="text-4xl font-bold text-gray-900">Resume Review</p>
 
+          {/* Still loading */}
           {loading && (
             <div className="flex flex-col items-center justify-center py-20 gap-4">
               <img src="/images/resume-scan-2.gif" className="w-48" alt="loading" />
@@ -126,15 +137,17 @@ export default function ResumePage() {
             </div>
           )}
 
+          {/* Not found empty state */}
           {!loading && notFound && (
             <div className="text-center py-20 flex flex-col items-center gap-6">
-              <p className="text-2xl text-gray-400">Resume not found.</p>
-              <button onClick={() => navigate('/')} className="primary-button w-fit px-8 py-3">
-                Go to Dashboard
+              <p className="text-2xl text-gray-400">Resume review unavailable.</p>
+              <button onClick={() => navigate('/upload')} className="primary-button w-fit px-8 py-3">
+                Upload Resume & Start Analysis
               </button>
             </div>
           )}
 
+          {/* Feedback loaded */}
           {!loading && resume?.feedback && (
             <div className="flex flex-col gap-8 w-full" style={{ animation: 'fadeIn 0.8s ease-in' }}>
               <Summary feedback={resume.feedback} />
@@ -146,10 +159,11 @@ export default function ResumePage() {
             </div>
           )}
 
+          {/* Resume saved but feedback missing */}
           {!loading && resume && !resume.feedback && (
-            <div className="text-center py-20 flex flex-col items-center gap-6">
+            <div className="text-center py-20">
               <p className="text-xl text-gray-400">Analysis not available for this resume.</p>
-              <button onClick={() => navigate('/upload')} className="primary-button w-fit px-8 py-3">
+              <button onClick={() => navigate('/upload')} className="primary-button w-fit px-8 py-3 mt-6">
                 Analyze Again
               </button>
             </div>

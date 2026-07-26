@@ -18,7 +18,7 @@ export async function analyzeResume({
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: 'mistral-small-latest',
+      model: 'pixtral-12b-2409',
       messages: [
         {
           role: 'user',
@@ -36,28 +36,25 @@ export async function analyzeResume({
 
   if (!response.ok) {
     const txt = await response.text();
-    let errorDetail = txt;
+    let detail = txt;
     try {
-      const errObj = JSON.parse(txt);
-      if (errObj.error?.message) errorDetail = errObj.error.message;
-      else if (errObj.message) errorDetail = errObj.message;
+      const parsed = JSON.parse(txt);
+      if (parsed.message) detail = parsed.message;
     } catch {}
-    throw new Error(`Mistral API error (${response.status}): ${errorDetail}`);
+    throw new Error(`Mistral API Error (${response.status}): ${detail}`);
   }
 
   const data = await response.json();
   const raw: string = data.choices?.[0]?.message?.content ?? '';
 
   try {
-    const clean = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
-    return JSON.parse(clean) as Feedback;
+    const cleaned = raw.replace(/```json?\s*|\s*```/g, '').trim();
+    return JSON.parse(cleaned) as Feedback;
   } catch {
-    const firstBrace = raw.indexOf('{');
-    const lastBrace = raw.lastIndexOf('}');
-    if (firstBrace !== -1 && lastBrace > firstBrace) {
-      const jsonStr = raw.substring(firstBrace, lastBrace + 1);
-      return JSON.parse(jsonStr) as Feedback;
+    const match = raw.match(/\{[\s\S]*\}/);
+    if (match) {
+      return JSON.parse(match[0]) as Feedback;
     }
-    throw new Error(`Could not parse JSON response from Mistral AI: ${raw.slice(0, 100)}...`);
+    throw new Error(`Failed to parse AI response as JSON. Raw output: ${raw.slice(0, 100)}...`);
   }
 }

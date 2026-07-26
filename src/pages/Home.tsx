@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from '../lib/router';
 import { usePuterStore } from '../lib/puter';
 import Navbar from '../components/Navbar';
@@ -12,7 +12,7 @@ export default function Home() {
 
   useEffect(() => {
     if (!isLoading && !auth.isAuthenticated) navigate('/auth?next=/');
-  }, [isLoading, auth.isAuthenticated]);
+  }, [isLoading, auth.isAuthenticated, navigate]);
 
   useEffect(() => {
     if (!auth.isAuthenticated) return;
@@ -23,130 +23,107 @@ export default function Home() {
       setLoadingResumes(false);
     };
     load();
-  }, [auth.isAuthenticated]);
-
-  // Compute SaaS analytics metrics
-  const stats = useMemo(() => {
-    if (resumes.length === 0) return { total: 0, avgScore: 0, topScore: 0 };
-    const scores = resumes.map((r) => r.feedback?.overallScore ?? 0);
-    const total = resumes.length;
-    const avgScore = Math.round(scores.reduce((a, b) => a + b, 0) / total);
-    const topScore = Math.max(...scores);
-    return { total, avgScore, topScore };
-  }, [resumes]);
+  }, [auth.isAuthenticated, kv]);
 
   return (
-    <main className="min-h-screen bg-slate-50/50 pb-20" style={{ backgroundImage: "url('/images/bg-main.svg')", backgroundSize: 'cover' }}>
+    <main style={{ backgroundImage: "url('/images/bg-main.svg')", backgroundSize: 'cover' }}>
       <Navbar />
-      <section className="main-section max-w-7xl mx-auto px-4 pt-10">
-        <div className="page-heading w-full flex flex-col items-center text-center gap-4">
-          <h1 className="text-4xl sm:text-5xl font-black tracking-tight max-w-3xl">
-            Track Applications & AI Ratings
-          </h1>
-          <p className="text-slate-600 text-lg max-w-2xl font-normal leading-relaxed">
-            Monitor your resume optimizations, review detailed ATS score breakdowns, and refine your job applications.
-          </p>
-
-          {/* Stats Bar */}
-          {!loadingResumes && resumes.length > 0 && (
-            <div className="w-full max-w-3xl grid grid-cols-3 gap-4 my-4">
-              <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm text-center">
-                <p className="text-xs font-bold uppercase text-slate-400">Total Scans</p>
-                <p className="text-3xl font-black text-slate-900 mt-1">{stats.total}</p>
-              </div>
-              <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm text-center">
-                <p className="text-xs font-bold uppercase text-slate-400">Average ATS Score</p>
-                <p className="text-3xl font-black text-indigo-600 mt-1">{stats.avgScore}%</p>
-              </div>
-              <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm text-center">
-                <p className="text-xs font-bold uppercase text-slate-400">Best Match Rating</p>
-                <p className="text-3xl font-black text-emerald-600 mt-1">{stats.topScore}%</p>
-              </div>
-            </div>
-          )}
+      <section className="main-section max-w-7xl mx-auto">
+        <div className="page-heading py-12">
+          <h1>Track Your Applications & Resume Ratings</h1>
+          {!loadingResumes && resumes.length === 0
+            ? <h2>No resumes yet. Upload your first resume to get feedback.</h2>
+            : <h2>Review your submissions and check AI-powered feedback.</h2>}
         </div>
 
         {loadingResumes && (
-          <div className="flex flex-col items-center justify-center py-20 gap-4">
-            <img src="/images/resume-scan-2.gif" className="w-[180px]" alt="loading" />
-            <p className="text-sm font-medium text-slate-500">Loading your saved resume analyses...</p>
+          <div className="flex items-center justify-center py-20">
+            <img src="/images/resume-scan-2.gif" className="w-[200px]" alt="loading" />
           </div>
         )}
 
         {!loadingResumes && resumes.length > 0 && (
-          <div className="resumes-section mt-4">
+          <div className="resumes-section">
             {resumes.map((r) => <ResumeCard key={r.id} resume={r} />)}
           </div>
         )}
 
         {!loadingResumes && resumes.length === 0 && (
-          <div className="w-full max-w-xl bg-white rounded-3xl p-10 border border-slate-200 shadow-xl text-center flex flex-col items-center gap-6 my-8">
-            <div className="w-20 h-20 rounded-3xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-4xl shadow-inner">
-              📄
-            </div>
-            <div>
-              <h3 className="text-2xl font-extrabold text-slate-900">No Resumes Analyzed Yet</h3>
-              <p className="text-slate-500 text-sm mt-2 max-w-md">
-                Upload your resume PDF along with target job titles to generate your first AI-driven ATS score and improvement roadmap.
-              </p>
-            </div>
-            <button
-              onClick={() => navigate('/upload')}
-              className="primary-button text-base font-bold px-8 py-3.5 shadow-lg shadow-indigo-200"
-            >
-              🚀 Analyze Your First Resume
-            </button>
-          </div>
+          <button
+            onClick={() => navigate('/upload')}
+            className="primary-button w-fit text-xl font-semibold px-10 py-4 mt-4 shadow-lg shadow-indigo-500/25 hover:scale-105 transition-transform"
+          >
+            Upload Resume
+          </button>
         )}
 
-        {/* Feature Cards Grid — Displayed on Home Page */}
-        <div className="w-full max-w-5xl mt-12 pt-8 border-t border-slate-200/60">
-          <div className="text-center mb-8">
-            <h3 className="text-2xl font-black text-slate-900">How Resumind Supercharges Your Job Search</h3>
-            <p className="text-slate-500 text-sm mt-1">AI-powered resume optimization designed to bypass ATS filters</p>
+        {/* Section below used resumes */}
+        {!loadingResumes && (
+          <div className="w-full mt-16 flex flex-col gap-12 max-w-6xl">
+            {/* Quick Stats & Benefits Banner */}
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-8 md:p-12 shadow-2xl border border-indigo-500/20">
+              <div className="absolute -top-24 -right-24 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
+              <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+                <div className="flex flex-col gap-3 text-center md:text-left max-w-xl">
+                  <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-indigo-300 bg-indigo-500/20 border border-indigo-400/30 px-3.5 py-1 rounded-full w-fit mx-auto md:mx-0">
+                    ✨ AI Career Optimization
+                  </span>
+                  <h3 className="text-2xl md:text-3xl font-bold tracking-tight text-white">
+                    Apply with confidence to every role
+                  </h3>
+                  <p className="text-slate-300 text-sm md:text-base leading-relaxed">
+                    Tailoring your resume for each target position boosts ATS keyword match rates by up to 40%. Get instant actionable tips before submitting.
+                  </p>
+                </div>
+                <button
+                  onClick={() => navigate('/upload')}
+                  className="bg-white text-indigo-950 font-bold px-8 py-4 rounded-full shadow-lg hover:bg-indigo-50 transition-all hover:scale-105 whitespace-nowrap text-base cursor-pointer border-none"
+                >
+                  + Analyze New Job Target
+                </button>
+              </div>
+            </div>
+
+            {/* Feature Cards Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-white/80 backdrop-blur-sm border border-slate-200/80 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col gap-4">
+                <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl font-bold">
+                  🎯
+                </div>
+                <div>
+                  <h4 className="font-bold text-slate-900 text-lg">ATS Keyword Match</h4>
+                  <p className="text-slate-500 text-sm mt-1 leading-relaxed">
+                    Automatically compare hard skills & key terms in your resume against the employer's job description.
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-white/80 backdrop-blur-sm border border-slate-200/80 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col gap-4">
+                <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl font-bold">
+                  ⚡
+                </div>
+                <div>
+                  <h4 className="font-bold text-slate-900 text-lg">Format & Layout Audit</h4>
+                  <p className="text-slate-500 text-sm mt-1 leading-relaxed">
+                    Detect formatting issues, structural errors, and missing sections that prevent ATS bots from parsing correctly.
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-white/80 backdrop-blur-sm border border-slate-200/80 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col gap-4">
+                <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl font-bold">
+                  📈
+                </div>
+                <div>
+                  <h4 className="font-bold text-slate-900 text-lg">Impact Quantification</h4>
+                  <p className="text-slate-500 text-sm mt-1 leading-relaxed">
+                    Get tailored suggestions to rephrase experience bullet points into high-impact, metric-driven achievements.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
-            <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm flex flex-col gap-3">
-              <span className="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-black">
-                01
-              </span>
-              <h4 className="font-bold text-slate-900 text-base">Comprehensive ATS Scoring</h4>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Evaluates formatting, section hierarchy, ATS keyword density, and bullet point structure against industry standards.
-              </p>
-            </div>
-
-            <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm flex flex-col gap-3">
-              <span className="w-8 h-8 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center text-xs font-black">
-                02
-              </span>
-              <h4 className="font-bold text-slate-900 text-base">Tone & Impact Analytics</h4>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Highlights strong action verbs, quantifiable achievements, and active voice to maximize recruiter interest.
-              </p>
-            </div>
-
-            <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm flex flex-col gap-3">
-              <span className="w-8 h-8 rounded-xl bg-pink-100 text-pink-700 flex items-center justify-center text-xs font-black">
-                03
-              </span>
-              <h4 className="font-bold text-slate-900 text-base">Targeted Suggestions</h4>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Receive actionable bullet-by-bullet improvement tips tailored directly to your target role and industry.
-              </p>
-            </div>
-          </div>
-
-          {/* Privacy Banner */}
-          <div className="mt-8 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl p-6 shadow-lg flex items-center justify-center gap-4 text-center">
-            <div className="text-3xl">🔒</div>
-            <div className="text-left">
-              <p className="text-xs font-extrabold text-indigo-300 uppercase tracking-wider">Privacy Guaranteed</p>
-              <p className="text-xs text-slate-300 mt-0.5">Your files are stored securely in browser storage and Puter Cloud.</p>
-            </div>
-          </div>
-        </div>
+        )}
       </section>
     </main>
   );

@@ -49,3 +49,8 @@ interface KVItem {
   key: string;
   value: string;
 }
+
+declare module '*?url' {
+  const content: string;
+  export default content;
+}
