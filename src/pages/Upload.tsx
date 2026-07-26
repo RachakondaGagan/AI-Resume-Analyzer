@@ -72,14 +72,18 @@ export default function Upload() {
 
       setStatus('Encoding image...');
       const base64 = await blobToBase64(img.file);
-      sessionStorage.setItem(`resume_img:${uuid}`, `data:image/png;base64,${base64}`);
+      try {
+        sessionStorage.setItem(`resume_img:${uuid}`, `data:image/jpeg;base64,${base64}`);
+      } catch {}
 
       setStatus('Analyzing with Mistral AI...');
       const feedback = await analyzeResume({ imageBase64: base64, jobTitle, jobDescription, apiKey: key });
 
       setStatus('Saving results...');
       resumeData.feedback = feedback;
-      sessionStorage.setItem(`resume:${uuid}`, JSON.stringify(resumeData));
+      try {
+        sessionStorage.setItem(`resume:${uuid}`, JSON.stringify(resumeData));
+      } catch {}
       await kv.set(`resume:${uuid}`, JSON.stringify(resumeData));
 
       setStatus('Done! Opening results...');

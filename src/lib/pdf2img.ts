@@ -34,7 +34,7 @@ export async function convertPdfToImage(file: File): Promise<PdfConversionResult
     // Render up to 3 pages
     for (let i = 1; i <= Math.min(numPages, 3); i++) {
       const page = await pdf.getPage(i);
-      const viewport = page.getViewport({ scale: 2.5 });
+      const viewport = page.getViewport({ scale: 1.5 });
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       canvas.width = viewport.width;
@@ -67,11 +67,11 @@ export async function convertPdfToImage(file: File): Promise<PdfConversionResult
       mergedCanvas.toBlob((blob) => {
         if (blob) {
           const name = file.name.replace(/\.pdf$/i, '');
-          resolve({ imageUrl: URL.createObjectURL(blob), file: new File([blob], `${name}.png`, { type: 'image/png' }) });
+          resolve({ imageUrl: URL.createObjectURL(blob), file: new File([blob], `${name}.jpg`, { type: 'image/jpeg' }) });
         } else {
           resolve({ imageUrl: '', file: null, error: 'Blob creation failed' });
         }
-      }, 'image/png', 0.92);
+      }, 'image/jpeg', 0.8);
     });
   } catch (err) {
     return { imageUrl: '', file: null, error: String(err) };
