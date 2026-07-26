@@ -82,14 +82,39 @@ export default function ResumePage() {
     return () => { cancelled = true; };
   }, [puterReady, auth.isAuthenticated, id, fs, kv]);
 
+  const handleDeleteThisResume = async () => {
+    if (!id) return;
+    if (window.confirm('Are you sure you want to delete this resume analysis?')) {
+      sessionStorage.removeItem(`resume:${id}`);
+      sessionStorage.removeItem(`resume_img:${id}`);
+      await kv.delete(`resume:${id}`);
+      if (resume?.imagePath) fs.delete(resume.imagePath).catch(() => {});
+      if (resume?.resumePath) fs.delete(resume.resumePath).catch(() => {});
+      navigate('/');
+    }
+  };
+
   return (
     <main className="!pt-0 min-h-screen">
       {/* Top nav */}
-      <nav className="resume-nav sticky top-0 bg-white z-10">
-        <button onClick={() => navigate('/')} className="back-button">
-          <img src="/icons/back.svg" alt="back" className="w-2.5 h-2.5" />
-          <span className="text-gray-800 text-sm font-semibold">Back to Dashboard</span>
-        </button>
+      <nav className="resume-nav sticky top-0 bg-white z-10 px-6 py-3 border-b border-gray-200 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <button onClick={() => navigate('/')} className="back-button">
+            <img src="/icons/back.svg" alt="back" className="w-2.5 h-2.5" />
+            <span className="text-gray-800 text-sm font-semibold">Back to Dashboard</span>
+          </button>
+          {resume && (
+            <button
+              onClick={handleDeleteThisResume}
+              className="flex items-center gap-1.5 text-xs text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg px-3 py-2 transition-colors cursor-pointer"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              <span>Delete Analysis</span>
+            </button>
+          )}
+        </div>
         {resume && (
           <div className="flex flex-col items-end">
             {resume.companyName && (
