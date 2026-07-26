@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from '../lib/router';
 import { usePuterStore } from '../lib/puter';
 import { markIdAsDeleted } from '../lib/utils';
+import { convertPdfToImage } from '../lib/pdf2img';
 import Summary from '../components/Summary';
 import ATS from '../components/ATS';
 import Details from '../components/Details';
@@ -11,6 +12,7 @@ export default function ResumePage() {
   const { id } = useParams();
   const { navigate } = useNavigate();
   const [imageUrl, setImageUrl] = useState('');
+  const [pageImages, setPageImages] = useState<string[]>([]);
   const [resumeUrl, setResumeUrl] = useState('');
   const [resume, setResume] = useState<Resume | null>(null);
   const [loading, setLoading] = useState(true);
@@ -53,8 +55,14 @@ export default function ResumePage() {
         const data: Resume = JSON.parse(raw);
         if (!cancelled) setResume(data);
 
-        // Check instant local thumbnail cache
+        // Check instant local thumbnail & page images cache
         const localImg = sessionStorage.getItem(`resume_img:${id}`);
+        const localPages = sessionStorage.getItem(`resume_pages:${id}`);
+
+        if (localPages && !cancelled) {
+          try { setPageImages(JSON.parse(localPages)); } catch {}
+        }
+
         if (localImg && !cancelled) {
           setImageUrl(localImg);
         } else if (data.imagePath) {
@@ -64,11 +72,19 @@ export default function ResumePage() {
           }
         }
 
-        // Load PDF blob for the "open PDF" link
+        // Load PDF blob & generate close-up page cards if needed
         if (data.resumePath) {
           const pdfBlob = await fs.read(data.resumePath);
           if (pdfBlob && !cancelled) {
             setResumeUrl(URL.createObjectURL(new Blob([pdfBlob], { type: 'application/pdf' })));
+
+            if (!localPages) {
+              const pdfFile = new File([pdfBlob], 'document.pdf', { type: 'application/pdf' });
+              const res = await convertPdfToImage(pdfFile);
+              if (res.pageImages && res.pageImages.length > 0 && !cancelled) {
+                setPageImages(res.pageImages);
+              }
+            }
           }
         }
       } catch (err) {
@@ -89,6 +105,7 @@ export default function ResumePage() {
       markIdAsDeleted(id);
       sessionStorage.removeItem(`resume:${id}`);
       sessionStorage.removeItem(`resume_img:${id}`);
+      sessionStorage.removeItem(`resume_pages:${id}`);
       await kv.delete(`resume:${id}`);
       if (resume?.imagePath) fs.delete(resume.imagePath).catch(() => {});
       if (resume?.resumePath) fs.delete(resume.resumePath).catch(() => {});
@@ -130,17 +147,50 @@ export default function ResumePage() {
       </nav>
 
       <div className="flex flex-row w-full max-lg:flex-col-reverse">
-        {/* LEFT — sticky resume preview */}
+        {/* LEFT — close-up scrollable resume page preview */}
         <section
-          className="feedback-section h-[100vh] sticky top-0 items-center justify-center"
+          className="feedback-section h-[100vh] sticky top-0 items-center justify-start overflow-y-auto py-6 px-4"
           style={{ backgroundImage: "url('/images/bg-small.svg')", backgroundSize: 'cover' }}
         >
-          {imageUrl ? (
-            <div className="gradient-border h-[90%] w-fit" style={{ animation: 'fadeIn 0.8s ease-in' }}>
+          {pageImages.length > 0 ? (
+            <div className="flex flex-col gap-6 w-full max-w-xl mx-auto">
+              {pageImages.map((pageUrl, idx) => (
+                <div
+                  key={idx}
+                  className="bg-white rounded-2xl shadow-xl border border-slate-200/90 overflow-hidden flex flex-col items-center transition-all duration-300"
+                  style={{ animation: 'fadeIn 0.5s ease-in' }}
+                >
+                  <div className="w-full bg-slate-100/90 border-b border-slate-200/70 px-4 py-2.5 flex items-center justify-between text-xs font-semibold text-slate-600">
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-indigo-500" />
+                      Page {idx + 1} of {pageImages.length}
+                    </span>
+                    <a
+                      href={resumeUrl || '#'}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-1"
+                    >
+                      <span>Open Original PDF</span>
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                    </a>
+                  </div>
+                  <img
+                    src={pageUrl}
+                    className="w-full h-auto object-contain bg-white"
+                    alt={`Resume Page ${idx + 1}`}
+                  />
+                </div>
+              ))}
+            </div>
+          ) : imageUrl ? (
+            <div className="bg-white rounded-2xl shadow-xl border border-slate-200/90 overflow-hidden w-full max-w-xl mx-auto" style={{ animation: 'fadeIn 0.8s ease-in' }}>
               <a href={resumeUrl || '#'} target="_blank" rel="noopener noreferrer" title="Click to open PDF">
                 <img
                   src={imageUrl}
-                  className="w-full h-full object-contain rounded-2xl"
+                  className="w-full h-auto object-contain"
                   alt="Resume preview"
                 />
               </a>

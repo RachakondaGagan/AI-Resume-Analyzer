@@ -74,6 +74,9 @@ export default function Upload() {
       const base64 = await blobToBase64(img.file);
       try {
         sessionStorage.setItem(`resume_img:${uuid}`, `data:image/jpeg;base64,${base64}`);
+        if (img.pageImages && img.pageImages.length > 0) {
+          sessionStorage.setItem(`resume_pages:${uuid}`, JSON.stringify(img.pageImages));
+        }
       } catch {}
 
       setStatus('Analyzing with Mistral AI...');

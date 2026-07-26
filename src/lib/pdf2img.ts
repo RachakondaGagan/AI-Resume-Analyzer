@@ -2,6 +2,7 @@ import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
 export interface PdfConversionResult {
   imageUrl: string;
+  pageImages: string[];
   file: File | null;
   error?: string;
 }
@@ -28,13 +29,14 @@ export async function convertPdfToImage(file: File): Promise<PdfConversionResult
     const numPages = pdf.numPages;
 
     const pageCanvases: HTMLCanvasElement[] = [];
+    const pageImages: string[] = [];
     let totalWidth = 0;
     let totalHeight = 0;
 
-    // Render up to 3 pages
+    // Render up to 3 pages at high-res close-up scale
     for (let i = 1; i <= Math.min(numPages, 3); i++) {
       const page = await pdf.getPage(i);
-      const viewport = page.getViewport({ scale: 1.5 });
+      const viewport = page.getViewport({ scale: 2.0 });
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       canvas.width = viewport.width;
@@ -43,11 +45,12 @@ export async function convertPdfToImage(file: File): Promise<PdfConversionResult
       await page.render({ canvasContext: ctx!, viewport }).promise;
 
       pageCanvases.push(canvas);
+      pageImages.push(canvas.toDataURL('image/jpeg', 0.85));
       totalWidth = Math.max(totalWidth, viewport.width);
       totalHeight += viewport.height;
     }
 
-    // Stitch pages vertically
+    // Stitch pages vertically for AI analysis payload
     const mergedCanvas = document.createElement('canvas');
     mergedCanvas.width = totalWidth;
     mergedCanvas.height = totalHeight;
@@ -67,14 +70,18 @@ export async function convertPdfToImage(file: File): Promise<PdfConversionResult
       mergedCanvas.toBlob((blob) => {
         if (blob) {
           const name = file.name.replace(/\.pdf$/i, '');
-          resolve({ imageUrl: URL.createObjectURL(blob), file: new File([blob], `${name}.jpg`, { type: 'image/jpeg' }) });
+          resolve({
+            imageUrl: URL.createObjectURL(blob),
+            pageImages,
+            file: new File([blob], `${name}.jpg`, { type: 'image/jpeg' }),
+          });
         } else {
-          resolve({ imageUrl: '', file: null, error: 'Blob creation failed' });
+          resolve({ imageUrl: '', pageImages: [], file: null, error: 'Blob creation failed' });
         }
       }, 'image/jpeg', 0.8);
     });
   } catch (err) {
-    return { imageUrl: '', file: null, error: String(err) };
+    return { imageUrl: '', pageImages: [], file: null, error: String(err) };
   }
 }
 
