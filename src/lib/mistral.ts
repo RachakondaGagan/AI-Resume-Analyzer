@@ -1,5 +1,22 @@
 import { prepareInstructions } from './constants';
 
+function normalizeScore(val: number): number {
+  if (typeof val !== 'number' || isNaN(val)) return 75;
+  if (val > 0 && val <= 10) return Math.min(100, Math.round(val * 10));
+  return Math.min(100, Math.max(0, Math.round(val)));
+}
+
+function processFeedback(fb: Feedback): Feedback {
+  if (!fb) return fb;
+  fb.overallScore = normalizeScore(fb.overallScore);
+  if (fb.ATS) fb.ATS.score = normalizeScore(fb.ATS.score);
+  if (fb.toneAndStyle) fb.toneAndStyle.score = normalizeScore(fb.toneAndStyle.score);
+  if (fb.content) fb.content.score = normalizeScore(fb.content.score);
+  if (fb.structure) fb.structure.score = normalizeScore(fb.structure.score);
+  if (fb.skills) fb.skills.score = normalizeScore(fb.skills.score);
+  return fb;
+}
+
 export async function analyzeResume({
   imageBase64,
   jobTitle,
@@ -47,14 +64,18 @@ export async function analyzeResume({
   const data = await response.json();
   const raw: string = data.choices?.[0]?.message?.content ?? '';
 
+  let parsed: Feedback;
   try {
     const cleaned = raw.replace(/```json?\s*|\s*```/g, '').trim();
-    return JSON.parse(cleaned) as Feedback;
+    parsed = JSON.parse(cleaned) as Feedback;
   } catch {
     const match = raw.match(/\{[\s\S]*\}/);
     if (match) {
-      return JSON.parse(match[0]) as Feedback;
+      parsed = JSON.parse(match[0]) as Feedback;
+    } else {
+      throw new Error(`Failed to parse AI response as JSON. Raw output: ${raw.slice(0, 100)}...`);
     }
-    throw new Error(`Failed to parse AI response as JSON. Raw output: ${raw.slice(0, 100)}...`);
   }
+
+  return processFeedback(parsed);
 }

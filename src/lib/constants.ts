@@ -29,13 +29,20 @@ export const prepareInstructions = ({
   jobTitle: string;
   jobDescription: string;
 }) =>
-  `You are an expert ATS and resume analyst.
-Analyze the resume image carefully and rate it.
-Give honest, detailed feedback. Low scores are fine if warranted.
-Job title: ${jobTitle}
-Job description: ${jobDescription}
-Return ONLY a valid JSON object matching this exact shape (no markdown, no backticks):
+  `You are an expert ATS (Applicant Tracking System) resume reviewer and hiring manager.
+Analyze the attached resume image against the job target.
+
+TARGET POSITION:
+- Job Title: ${jobTitle}
+- Job Description: ${jobDescription}
+
+SCORING INSTRUCTIONS (IMPORTANT):
+- EVERY score must be an integer on a 0 to 100 percentage scale (e.g., 85, 92, 78). DO NOT output single-digit scores out of 10!
+- Evaluate match quality fairly based on skills, experience, projects, keywords, and formatting.
+- Well-structured resumes with matching tech stack and projects should score between 75 and 95.
+
+Return ONLY a valid JSON object with no markdown syntax wrapping matching this exact structure:
 ${AIResponseFormat}
-Give 3-4 tips per section. ATS tips only need "type" and "tip". All other sections also need "explanation".`;
+Provide 3-4 specific, actionable tips per section.`;
 
 export const MISTRAL_KEY_LS = 'resumind_mistral_key';
