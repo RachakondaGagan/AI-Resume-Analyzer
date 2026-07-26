@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from '../lib/router';
 import { usePuterStore } from '../lib/puter';
+import { markIdAsDeleted } from '../lib/utils';
 import ScoreCircle from './ScoreCircle';
 
 interface ResumeCardProps {
@@ -33,6 +34,7 @@ export default function ResumeCard({ resume, onDelete }: ResumeCardProps) {
   const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
     setDeleting(true);
+    markIdAsDeleted(id);
     try {
       // 1. Clear session storage caches
       sessionStorage.removeItem(`resume:${id}`);

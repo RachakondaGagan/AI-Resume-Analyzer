@@ -14,3 +14,22 @@ export function formatSize(bytes: number): string {
 }
 
 export const generateUUID = () => crypto.randomUUID();
+
+const DELETED_KEY = 'resumind_deleted_ids';
+
+export function getDeletedIds(): Set<string> {
+  try {
+    const raw = localStorage.getItem(DELETED_KEY);
+    return new Set(raw ? JSON.parse(raw) : []);
+  } catch {
+    return new Set();
+  }
+}
+
+export function markIdAsDeleted(id: string): void {
+  try {
+    const set = getDeletedIds();
+    set.add(id);
+    localStorage.setItem(DELETED_KEY, JSON.stringify(Array.from(set)));
+  } catch {}
+}

@@ -138,7 +138,10 @@ export const usePuterStore = create<PuterStore>((set, get) => {
       },
       delete: async (key) => {
         const p = get_puter(); if (!p) return undefined;
-        return p.kv.delete(key);
+        try { if (p.kv.del) await p.kv.del(key); } catch {}
+        try { if (p.kv.delete) await p.kv.delete(key); } catch {}
+        try { await p.kv.set(key, 'null'); } catch {}
+        return true;
       },
       list: async (pattern, returnValues) => {
         const p = get_puter(); if (!p) return undefined;

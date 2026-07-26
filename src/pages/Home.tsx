@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from '../lib/router';
 import { usePuterStore } from '../lib/puter';
+import { getDeletedIds } from '../lib/utils';
 import Navbar from '../components/Navbar';
 import ResumeCard from '../components/ResumeCard';
 
@@ -18,8 +19,16 @@ export default function Home() {
     if (!auth.isAuthenticated) return;
     const load = async () => {
       setLoadingResumes(true);
+      const deletedSet = getDeletedIds();
       const items = (await kv.list('resume:*', true)) as KVItem[] | undefined;
-      setResumes(items?.map((item) => JSON.parse(item.value) as Resume) ?? []);
+      const valid = items
+        ?.filter((item) => item && item.key && item.value && item.value !== 'null')
+        .map((item) => {
+          try { return JSON.parse(item.value) as Resume; } catch { return null; }
+        })
+        .filter((r): r is Resume => r !== null && !deletedSet.has(r.id)) ?? [];
+
+      setResumes(valid);
       setLoadingResumes(false);
     };
     load();

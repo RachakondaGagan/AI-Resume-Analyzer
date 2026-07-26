@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from '../lib/router';
 import { usePuterStore } from '../lib/puter';
+import { markIdAsDeleted } from '../lib/utils';
 import Summary from '../components/Summary';
 import ATS from '../components/ATS';
 import Details from '../components/Details';
@@ -85,6 +86,7 @@ export default function ResumePage() {
   const handleDeleteThisResume = async () => {
     if (!id) return;
     if (window.confirm('Are you sure you want to delete this resume analysis?')) {
+      markIdAsDeleted(id);
       sessionStorage.removeItem(`resume:${id}`);
       sessionStorage.removeItem(`resume_img:${id}`);
       await kv.delete(`resume:${id}`);
